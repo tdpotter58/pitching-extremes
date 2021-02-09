@@ -1,3 +1,12 @@
+---
+title: "Pitching"
+author: "Tim Potter"
+date: "2/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(tidyr)
 library(knitr)
@@ -12,7 +21,6 @@ pitchers <- pitchers %>%
   select(-Pit, -Str) %>%
   drop_na()
 
-#kable(pitchers)
 pitchers <- pitchers %>%
   mutate(Year_ch = as.character(pitchers$Year))
          
@@ -22,19 +30,28 @@ for (i in pitchers$Rk){
   pitchers[i,2] <- str_c(name[1],pitchers[i,48], sep = " ")
 }
 
-theme_set(theme_bw())
-pitchers %>%
-  filter(`W-L%` < 0.5) %>%
-  ggplot(aes(x = ERA, y = `W-L%`, label = Player)) + 
-  geom_point(size = 2) +
-  geom_label_repel(data = subset(pitchers, `W-L%` < 0.34), fill = 'cyan') +
-  labs(caption = "Data from Baseball-Reference")
-
 pitchers <- pitchers %>%
   mutate(Player.f = as.factor(pitchers$Player))
 
 pitchers$Player.f <- factor(pitchers$Player.f, levels = pitchers$Player.f[order(pitchers$`W-L%`)])
 
+theme_set(theme_bw())
+```
+
+```{r, fig.width=12, fig.height=10}
+theme_set(theme_light())
+pitchers %>%
+  filter(`W-L%` < 0.5) %>%
+  ggplot(aes(x = ERA, y = `W-L%`, label = Player)) + 
+  geom_point(size = 2) +
+  geom_label_repel(data = subset(pitchers, `W-L%` < 0.34), fill = 'cyan') +
+  geom_label_repel(data = subset(pitchers, ERA < 2.25), fill = 'coral') +
+  ylab("Winning Percentage") +
+  ggtitle("Every Qualified Season Since 1968 with an ERA Below 3.00 and More Losses than Wins") +
+  labs(caption = "Data from Baseball-Reference") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+theme_set(theme_gray())
 pitchers %>%
   filter(`W-L%` < 0.5) %>%
   ggplot(aes(x = Player.f,y = `W-L%`, fill = ERA)) +
@@ -49,4 +66,4 @@ pitchers %>%
   labs(caption = "Players who qualified for ERA Title, since 1968.
        Data from Baseball-Reference") +
   theme(plot.title = element_text(hjust = 0.5)) 
-#coord_cartesian(ylim=c(0.3,0.5)) 
+```
